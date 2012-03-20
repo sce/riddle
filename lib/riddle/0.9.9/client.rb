@@ -11,7 +11,11 @@ class Riddle::Client
     socket.send [1].pack('N'), 0
 
     # Checking version
-    version = socket.recv(4).unpack('N*').first
+    unless version = socket.recv(4).unpack('N*').first
+      socket.close
+      raise ResponseError, "No response from searchd when checking version."
+    end
+
     if version < 1
       socket.close
       raise Riddle::VersionError, "Can only connect to searchd version 1.0 or better, not version #{version}"
